@@ -25,29 +25,29 @@ class StudentGui():
 
         self.label_id = Label(self.left_frame, text="IDNO")
         self.label_id.grid(row=0, column=0, sticky="w", pady=(0, 10))
-        self.entry_id = Entry(self.left_frame)
+        self.entry_id = Entry(self.left_frame, validate="key", validatecommand=(self.root.register(self.validate_idno), '%P'))
         self.entry_id.grid(row=0, column=1, pady=(0, 0), padx=(10, 0))
 
         self.label_lastname = Label(self.left_frame, text="LAST NAME")
         self.label_lastname.grid(row=1, column=0, sticky="w", pady=(0, 10))
-        self.entry_lastname = Entry(self.left_frame)
+        self.entry_lastname = Entry(self.left_frame, validate="key", validatecommand=(self.root.register(self.validate_names), '%P'))
         self.entry_lastname.grid(row=1, column=1, pady=(0, 10), padx=(10, 0))
 
         self.label_firstname = Label(self.left_frame, text="FIRST NAME")
         self.label_firstname.grid(row=2, column=0, sticky="w", pady=(0, 10))
-        self.entry_firstname = Entry(self.left_frame)
+        self.entry_firstname = Entry(self.left_frame, validate="key", validatecommand=(self.root.register(self.validate_names), '%P'))
         self.entry_firstname.grid(row=2, column=1, pady=(0, 10), padx=(10, 0))
 
         self.label_course = Label(self.left_frame, text="COURSE")
         self.label_course.grid(row=3, column=0, sticky="w", pady=(0, 10))
         self.course_options = ['BSIT', 'BSCS', 'BSCPE', 'BSCJ', 'BSHM', 'BSE', 'BEED']
-        self.combo_course = ttk.Combobox(self.left_frame, values=self.course_options, width=17)
+        self.combo_course = ttk.Combobox(self.left_frame, values=self.course_options, width=17, state="readonly")
         self.combo_course.grid(row=3, column=1, pady=(0, 10), padx=(10, 0))
 
         self.label_level = Label(self.left_frame, text="LEVEL")
         self.label_level.grid(row=4, column=0, sticky="w", pady=(0, 10))
         self.level_options = ['1', '2', '3', '4']
-        self.combo_level = ttk.Combobox(self.left_frame, values=self.level_options, width=17)
+        self.combo_level = ttk.Combobox(self.left_frame, values=self.level_options, width=17, state="readonly")
         self.combo_level.grid(row=4, column=1, pady=(0, 10), padx=(10,0))
 
         self.table_frame = Frame(self.root, padx=30, pady=10)
@@ -121,6 +121,13 @@ class StudentGui():
             self.entry_lastname.delete(0, END)
             self.combo_course.set('')
             self.combo_level.set('')
+            
+    def validate_idno(self, id_input):
+        return id_input.isdigit() or id_input == ""
+
+    def validate_names(self, name_input):
+        return name_input.isalpha() or name_input == ""
+
            
 def main() -> None:
     StudentGui()
