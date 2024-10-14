@@ -29,5 +29,18 @@ def add_record(table: str, **kwargs) -> bool:
     values: list = list(kwargs.values())
     fields: str = "`,`".join(keys)
     data: str = "','".join(values)
+ 
+    if validate_record(table, kwargs.get('idno')):
+        return False 
+        
     sql: str = f"INSERT INTO `{table}`(`{fields}`) VALUES('{data}')"
     return postprocess(sql)
+
+def validate_record(table: str, idno: str) -> bool:
+    sql: str = f"SELECT COUNT(*) FROM `{table}` WHERE idno = ?"
+    db: object = connect(database)
+    cursor: object = db.cursor()
+    cursor.execute(sql, (idno,))
+    result: int = cursor.fetchone()[0]
+    cursor.close()
+    return result > 0

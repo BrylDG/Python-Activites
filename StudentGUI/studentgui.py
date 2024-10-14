@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
-from dbfunctions import add_record, getall_records
+from dbfunctions import add_record, getall_records, validate_record
 
 
 class StudentGui():
@@ -105,14 +105,15 @@ class StudentGui():
         result = add_record('students', idno=student_id, firstname=first_name, lastname=last_name, course=course, level=year_level)
 
         if result:
-            messagebox.showinfo("Input Success", "Student record has been added successfully.")
+            messagebox.showinfo("Input Success", "Student added successfully.")
             self.clear_inputs()
             self.load_data()
         else:
-            messagebox.showerror("Input Error", "Failed to add student record.")
+            messagebox.showerror("Duplicate IDNO", f"IDNO already exists!")
+
     
     def clear_prompt(self):
-        if messagebox.askyesno("Confirmation", "Are you sure you want to clear all fields?"):
+        if messagebox.askyesno("Confirmation", "Are you sure you want to clear everything?"):
             self.clear_inputs()
             
     def clear_inputs(self):
