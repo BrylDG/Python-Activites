@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Inventory & User Registration</title>
+    
+    <!-- Bootstrap and Font Awesome CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        /* Header styles */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        #logo img {
+            height: 50px;
+        }
+
+        #nav a {
+            margin-right: 20px;
+            color: #000;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Form and Layout Styling */
+        .form-wrapper {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .form-container, .snapshot-container {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            width: 45%;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container h2, .snapshot-container h2 {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .form-container .form-group label, .snapshot-container label {
+            display: block;
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .form-container .form-group input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn-primary, .btn-save {
+            width: 100%;
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .btn-save {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+        }
+
+        /* Snapshot Display Styling */
+        .snapshot-container .text-box {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+            min-height: 30px;
+            font-size: 14px;
+        }
+
+        .snapshot-container img {
+            width: 100%;
+            max-width: 150px;
+            margin: 0 auto;
+            display: block;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="header">
+            <div id="logo">
+                <img src="../templates/images/logo.png" alt="logo">
+            </div>
+			<div id="nav">
+				<a href="{{ url_for('index') }}">HOME</a>
+				<a href="{{ url_for('list_users') }}">LIST</a>
+			</div>
+        </div>
+
+        <!-- Form Wrapper -->
+        <form id="userForm" method="POST" action="/add" class="form-wrapper">
+            <!-- Camera and Input Section -->
+            <div class="form-container">
+                <h2>Camera Viewer</h2>
+                <div id="camera" class="mb-3" style="text-align: center; margin-bottom: 20px;"></div>
+                <input type="hidden" id="image" name="image">
+                
+                <div class="form-group">
+                    <label for="idno">IDNO</label>
+                    <input type="text" id="idno" name="idno" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastname">LASTNAME</label>
+                    <input type="text" id="lastname" name="lastname" required>
+                </div>
+                <div class="form-group">
+                    <label for="firstname">FIRSTNAME</label>
+                    <input type="text" id="firstname" name="firstname" required>
+                </div>
+                <div class="form-group">
+                    <label for="course">COURSE</label>
+                    <input type="text" id="course" name="course" required>
+                </div>
+                <div class="form-group">
+                    <label for="level">LEVEL</label>
+                    <input type="text" id="level" name="level" required>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-primary" onclick="take_snapshot()">SNAP</button>
+                </div>
+            </div>
+
+            <!-- Snapshot Display Section -->
+            <div class="snapshot-container">
+                <h2>Snapshot</h2>
+                <div id="snapshot"></div>
+                
+                <label>IDNO</label>
+                <div class="text-box" id="display_idno"></div>
+                
+                <label>LASTNAME</label>
+                <div class="text-box" id="display_lastname"></div>
+                
+                <label>FIRSTNAME</label>
+                <div class="text-box" id="display_firstname"></div>
+                
+                <label>COURSE</label>
+                <div class="text-box" id="display_course"></div>
+                
+                <label>LEVEL</label>
+                <div class="text-box" id="display_level"></div>
+                
+                <div class="text-center">
+                    <button type="button" class="btn btn-save" onclick="save_snapshot()">SAVE</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="footer">
+            &copy; 2024 Bryl Darel Gorgonio
+        </div>
+    </div>
+
+    <!-- Webcam.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js" crossorigin="anonymous"></script>
+    <script>
+        Webcam.set({
+            width: 240,
+            height: 180,
+            image_format: 'jpeg',
+            jpeg_quality: 90
+        });
+        Webcam.attach('#camera');
+
+        function take_snapshot() {
+            Webcam.snap(function(data_uri) {
+                document.getElementById('snapshot').innerHTML = "<img src='" + data_uri + "' class='img-fluid'>";
+                document.getElementById('display_idno').innerText = document.getElementById('idno').value;
+                document.getElementById('display_lastname').innerText = document.getElementById('lastname').value;
+                document.getElementById('display_firstname').innerText = document.getElementById('firstname').value;
+                document.getElementById('display_course').innerText = document.getElementById('course').value;
+                document.getElementById('display_level').innerText = document.getElementById('level').value;
+                document.getElementById('image').value = data_uri;
+            });
+        }
+
+        function save_snapshot() {
+            const imageValue = document.getElementById('image').value;
+            const idnoValue = document.getElementById('idno').value;
+
+            if (!imageValue || !idnoValue) {
+                alert('Please capture an image and fill all fields.');
+                return;
+            }
+            document.getElementById('userForm').submit();
+        }
+    </script>
+</body>
+</html>
