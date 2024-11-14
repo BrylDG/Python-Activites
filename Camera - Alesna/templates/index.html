@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    
+    <!-- Bootstrap and Font Awesome CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f8;
+            color: #333;
+            padding-bottom: 20px; /* Reduced bottom padding */
+        }
+
+        /* Header Styling */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px; /* Reduced margin bottom */
+            border-bottom: 3px solid #5d88d1;
+            padding-bottom: 15px; /* Reduced padding */
+            background-color: #ffffff;
+            position: sticky; /* Keeps header sticky */
+            top: 0;
+            z-index: 100;
+        }
+
+        #logo img {
+            height: 70px; /* Reduced logo size */
+            padding-left: 35%; /* Adjusted logo position */
+        }
+
+        #nav a {
+            margin-right: 20px; /* Reduced margin */
+            color: #5d88d1;
+            font-size: 1rem; /* Reduced font size */
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        #nav a:hover {
+            color: #3c5c9e;
+            text-decoration: underline;
+        }
+
+        /* Form and Layout Styling */
+        .form-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px; /* Reduced gap between containers */
+        }
+
+        .form-container, .snapshot-container {
+            border-radius: 10px; /* Reduced border radius */
+            padding: 20px; /* Reduced padding */
+            width: 30%; /* Reduced width */
+            background-color: #ffffff;
+            box-shadow: 0px 6px 14px rgba(0, 0, 0, 0.1); /* Reduced box shadow */
+        }
+
+        .form-container h2, .snapshot-container h2 {
+            text-align: center;
+            font-size: 16px; /* Reduced font size */
+            margin-bottom: 25px; /* Reduced margin */
+            font-weight: 600;
+            color: #444;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 8px;
+        }
+
+        /* Center camera and snapshot elements */
+        #camera {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px; /* Reduced margin */
+            max-width: 240px; /* Reduced max-width */
+            max-height: 180px; /* Reduced max-height */
+        }
+
+        .form-group, .snapshot-group {
+            margin-bottom: 12px; /* Reduced margin */
+        }
+
+        /* Styling for labels and input boxes */
+        .form-group label, .snapshot-group label {
+            display: block;
+            font-weight: 500;
+            font-size: 13px; /* Reduced font size */
+            margin: 6px 0; /* Reduced margin */
+            color: #555;
+        }
+
+        /* Styling for input fields and text boxes */
+        .form-group input, .snapshot-group .text-box {
+            width: 100%;
+            padding: 8px; /* Reduced padding */
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 13px; /* Reduced font size */
+            color: #333;
+            background-color: #f9f9f9;
+        }
+
+        .snapshot-container .text-box {
+            min-height: 35px; /* Reduced height */
+        }
+
+        .btn-primary, .btn-save {
+            width: 100%;
+            font-size: 14px; /* Reduced font size */
+            padding: 10px; /* Reduced padding */
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #5d88d1;
+            color: #fff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #4a73a2;
+        }
+
+        .btn-save {
+            background-color: #47a74e;
+            color: #fff;
+            border: none;
+            margin-top: 15px; /* Reduced margin */
+        }
+
+        .btn-save:hover {
+            background-color: #3d8a3e;
+        }
+
+        .snapshot-container img {
+            width: 100%;
+            max-width: 240px; /* Reduced max-width */
+            height: auto;
+            max-height: 180px; /* Reduced max-height */
+            margin: 12px auto; /* Reduced margin */
+            display: block;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            background-color: #fff;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            font-size: 0.85rem; /* Reduced font size */
+            color: #888;
+            margin-top: 30px; /* Reduced margin */
+        }
+
+        .camera-container {
+            display: flex;
+            justify-content: center;
+        }
+
+        .container-fluid {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0px;
+            padding-bottom: 20px; /* Reduced bottom padding */
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="header">
+            <div id="logo">
+                <img src="static/images/logo.png" alt="logo">
+            </div>
+            <div id="nav">
+                <a href="{{ url_for('index') }}">HOME</a>
+                <a href="{{ url_for('table_users') }}">LIST</a>
+            </div>
+        </div>
+
+        <!-- Form Wrapper -->
+        <form id="userForm" method="POST" action="/add" class="form-wrapper" onsubmit="return validateForm()">
+            <!-- Snapshot Display Section -->
+            <div class="snapshot-container">    
+                <div id="snapshot"></div>
+                    
+                <div class="snapshot-group">
+                    <label>IDNO</label>
+                    <div class="text-box" id="display_idno"></div>
+                </div>
+
+                <div class="snapshot-group">
+                    <label>LASTNAME</label>
+                    <div class="text-box" id="display_lastname"></div>
+                </div>
+
+                <div class="snapshot-group">
+                    <label>FIRSTNAME</label>
+                    <div class="text-box" id="display_firstname"></div>
+                </div>
+
+                <div class="snapshot-group">
+                    <label>COURSE</label>
+                    <div class="text-box" id="display_course"></div>
+                </div>
+
+                <div class="snapshot-group">
+                    <label>LEVEL</label>
+                    <div class="text-box" id="display_level"></div>
+                </div>
+
+                <div class="text-center">
+                    <button type="button" class="btn btn-save" onclick="save_snapshot()">SAVE</button>
+                </div>
+            </div>
+            
+            <!-- Camera and Input Section -->
+            <div class="form-container">
+                <div class="camera-container">
+                    <div id="camera"></div>
+                    <input type="hidden" id="image" name="image">
+                </div>
+                
+                <div class="form-group">
+                    <label for="idno">IDNO</label>
+                    <input type="text" id="idno" name="idno" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastname">LASTNAME</label>
+                    <input type="text" id="lastname" name="lastname" required>
+                </div>
+                <div class="form-group">
+                    <label for="firstname">FIRSTNAME</label>
+                    <input type="text" id="firstname" name="firstname" required>
+                </div>
+                <div class="form-group">
+                    <label for="course">COURSE</label>
+                    <input type="text" id="course" name="course" required>
+                </div>
+                <div class="form-group">
+                    <label for="level">LEVEL</label>
+                    <input type="text" id="level" name="level" required>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-primary" onclick="take_snapshot()">SNAP</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="footer">
+            &copy; 2024 Christine Anne Alesna
+        </div>
+    </div>
+
+    <!-- Webcam.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js" crossorigin="anonymous"></script>
+    <script>
+        Webcam.set({
+            width: 240,
+            height: 180,
+            image_format: 'jpeg',
+            jpeg_quality: 90
+        });
+
+        function take_snapshot() {
+            Webcam.snap(function(data_uri) {
+                document.getElementById('snapshot').innerHTML = '<img src="' + data_uri + '"/>';
+                document.getElementById('image').value = data_uri;
+            });
+        }
+
+        function save_snapshot() {
+            var formData = new FormData(document.getElementById('userForm'));
+            fetch('/save_snapshot', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.json())
+            .then(data => {
+                alert('Snapshot Saved!');
+            });
+        }
+
+        // Webcam setup
+        Webcam.attach('#camera');
+    </script>
+</body>
+</html>
