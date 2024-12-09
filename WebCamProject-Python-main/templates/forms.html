@@ -1,0 +1,229 @@
+{% macro showform(mode, columns) -%}
+    {% if mode == 'take_snap' %}
+        <div>
+            <form id="userForm" action="/createqr" method="POST" style="width: 100%;margin: auto;color:black">
+                    {% for column in columns %}
+                        <div class="w3-padding">
+                            <input type="text" id="{{ column }}" name="{{ column }}" placeholder="Enter {{ column }}" class="w3-input w3-border w3-round-large" required>
+                        </div>
+                    {% endfor %}
+            
+                    <div class="w3-container w3-center w3-bar w3-row-padding w3-padding">
+                        <button 
+                            type="button"
+                            onclick="take_snapshot()" 
+                            class="w3-button w3-2021-french-blue w3-round w3-xlarge w3-margin-xlarge w3-bar-item" 
+                            style="color:white; border:none;">
+                            SNAP
+                            <i class="glyphicon glyphicon-camera"></i>
+                        </button>
+                    </div>
+            </form>
+        </div>
+    {% else %}
+        <div class="w3-row-padding">
+            <form action="/saveinfo" method="POST">
+                {% for column in columns %}
+                    <div class="w3-half w3-row-padding">
+                        <p>
+                            <label style="color:white">{{ column.upper() }}</label>
+                            <input type="text" id="my_{{ column }}" name="my_{{ column }}" class="w3-input w3-border w3-round-large" style=" background: transparent;border: none; color:aliceblue" readonly>
+                        </p>
+                    </div>
+                {% endfor %}
+    
+                <!-- Hidden input for the snapshot image data -->
+                <input type="hidden" id="image_data" name="image_data">
+                <div style="">
+                    <div class="w3-container">
+                        <button
+                            type="submit"
+                            class="w3-button w3-2021-french-blue w3-round-large w3-xlarge w3-margin-xlarge" 
+                            style="color:white; border:none;">
+                            SAVE
+                            <i class="glyphicon glyphicon-saved"></i>
+                        </button>
+                        <button
+                            type="button"
+                            onclick="deleteQR()"
+                            class="w3-button w3-2021-french-blue w3-round-large w3-xlarge w3-margin-xlarge">
+                                CANCEL</a>             
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>       
+     {% endif %}
+{%- endmacro %}
+
+{% macro flash_messages() -%}
+{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+		{% for category, message in messages %}
+			{% if category == 'info' or category =='success' %}
+				<div class="w3-panel w3-bar w3-large w3-green w3-display-topmiddle w3-margin-top w3-padding w3-animate-zoom" style="width:50%;margin:auto">
+					<span align="center">{{ message }}</span>
+					<span onclick="this.parentElement.style.display='none'" class="w3-button w3-large w3-small w3-display-topright">&times;</span>
+				</div>
+			{% elif category == 'error' %}
+				<div class="w3-panel w3-bar w3-large w3-red w3-display-topmiddle w3-margin-top w3-padding w3-animate-zoom" style="width:50%;margin:auto">
+					<span align="center">{{ message }}</span>
+					<span onclick="this.parentElement.style.display='none'" class="w3-button w3-large w3-small w3-display-topright">&times;</span>
+				</div>
+			{% endif %}
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+{%- endmacro %}
+
+{% macro showimagemodal(modal_name, id, student) -%}
+<div id="{{ id }}" class="w3-modal w3-mobile ">
+    <div class="w3-modal-content w3-animate-zoom" style="width: 41%;">
+        <header class="w3-container w3-2021-french-blue">
+            <span onclick="document.getElementById('{{ id }}').style.display='none'"
+            class="w3-button w3-display-topright w3-large">&times;</span>
+            <h2 class="w3-center">{{ modal_name }}</h2>
+        </header>
+        <div class="w3-center" style="position: absolute;">
+            {% if id.split('-')[0] == 'showimage' %}
+                <img style="width:551px; height:430px"src="{{ url_for('static', filename='images/studentimage/'+ student['image']) }}" alt="Student Image" title="Picture of {{ student['lastname'].title() + ', ' + student['firstname'].title() }}" >
+                <div class="" style="width:100%;position: relative;bottom:7.5em;color:white;">
+                    <h3 style="text-decoration: underline;">{{ student['lastname'].title() + ', ' + student['firstname'].title() }}</h3>
+                    <p><i>Student Image</i></p>
+                </div>
+            {% else %}
+                <img style="width:550px; height:480px"src="{{ url_for('static', filename='images/studentimage/'+ student['idno'] + '.png') }}" alt="Student QR Code" title="QR Code for {{ student['lastname'].title() + ', ' + student['firstname'].title() }}" >
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro updateimage(modal_name, id, student_idno) -%}
+<div id="{{ id }}" class="w3-modal">
+    <div class="w3-modal-content w3-animate-zoom w3-mobile" style="width: 41%;">
+        <header class="w3-container w3-2021-french-blue">
+            <span onclick="document.getElementById('{{ id }}').style.display='none'"
+            class="w3-button w3-display-topright w3-large">&times;</span>
+            <h2 class="w3-center">{{ modal_name }}</h2>
+        </header>
+        <div class="w3-border w3-border-blue" style="height: 35vh;margin:0;background-color:#051016">
+            <!-- Unique camera container ID based on student ID -->
+            <div id="my_camera2_{{ student_idno }}" style="margin:auto"></div>
+        </div>
+        <div class="button-container">
+            <div class="w3-center" style="margin-top: 10px;">
+                <button class="w3-button w3-blue w3-round-large" onclick="saveSnapshot('{{ student_idno }}')">Save Photo</button>
+            </div>
+        </div>
+    </div>
+</div>
+{%- endmacro %}
+
+
+{% macro showModal(modal_name, id, student, columns) -%}
+<div id="{{ id }}" class="w3-modal w3-mobile">
+    <div class="w3-modal-content w3-animate-zoom w3-mobile">
+        <header class="w3-container w3-2021-french-blue">
+            <span onclick="document.getElementById('{{ id }}').style.display='none'"
+            class="w3-button w3-display-topright w3-large">&times;</span>
+            <h2 class="w3-center">{{ modal_name }}</h2>
+        </header>
+
+        <div class="w3-container w3-row-padding w3-mobile">
+            <form class="w3-row-padding" method="POST" action="{{ url_for('updatestudent', idno=student['idno']) }}">
+                {% for column in columns[1:5]%}
+                    <div class="w3-half">
+                        <p>
+                            <label>{{column.upper()}}</label>
+                            <input type="text" value="{{student[column]}}" name="{{column}}" class="w3-input w3-border" required>
+                        </p>
+                    </div>
+                {% endfor %}
+                <div class="w3-panel w3-center w3-padding-top w3-mobile">
+                    <p class="w3-center">
+                        <input type="submit" value="{{ modal_name }}" class="w3-button w3-blue w3-round-large w3-large w3-padding-16 w3-mobile" style="width:30%">
+                    </p>
+                </div> 
+            </form>
+        </div>
+    </div>     
+</div>
+{%- endmacro %}
+
+{% macro showdeletemodal(modal_name, id, student_idno) -%}
+<div id="{{ id }}" class="w3-modal w3-mobile">
+    <div class="w3-modal-content w3-animate-zoom w3-round" style="width: 45%;">
+        <header class="w3-container w3-2021-french-blue">
+            <span onclick="document.getElementById('{{ id }}').style.display='none'"
+            class="w3-button w3-display-topright w3-large">&times;</span>
+            <h2 class="w3-center">{{ modal_name }}</h2>
+        </header>
+        <div class="w3-container w3-mobile w3-center w3-mobile w3-padding-16">
+            <h2>Are you sure to delete this {{modal_name.split(' ')[1].lower()}}?</h2>
+        </div>
+        <div class="w3-bar w3-center w3-margin-top w3-margin-bottom w3-mobile w3-padding-64">
+            <a href="{{ url_for(modal_name.split(' ')[0].lower() + modal_name.split(' ')[1].lower(),idno=student_idno) }}" class="w3-button w3-ios-red w3-round-xlarge w3-xlarge w3-margin-left" style="width: 25%;">Yes</a>
+            <span onclick="document.getElementById('{{ id }}').style.display='none'" class="w3-button w3-round-xlarge w3-border w3-border-red w3-xlarge" style="width: 25%;">No</span>
+        </div>
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro loginForm() -%}
+<div class="w3-card w3-mobile w3-container w3-margin-top w3-white" style="width: 50%;margin:auto;padding:0;position:relative;bottom:5em">
+    <div class="w3-center w3-bar w3-2021-french-blue">
+        <h1>Account Login</h1>
+    </div>
+    <div style="height: 45vh;">
+        <form class="w3-center w3-row-padding" action="/loginadmin" method="POST">
+            <div class="w3-margin" style="margin:auto">
+                <div class="w3-padding">
+                    <input type="text" style="width: 100%;padding:0.3em" class="w3-xlarge" name="username" id="username" placeholder="Username" required>
+                </div>
+                <div class="w3-padding">
+                    <input type="password" style="width:100%;padding:0.3em" class="w3-xlarge" name="password" id="password" placeholder="Password" required>
+                </div>
+            </div>
+            <div class="w3-padding-xlarge w3-margin-top">
+                <button type="submit" class="w3-round-large w3-xlarge w3-button" style="width: 70%; background-color: green; color: white;">
+                    LOGIN
+                </button>
+            </div>
+            <div class="w3-padding-large">
+                <p><span style="color:rgb(6, 154, 223);cursor:pointer"><a href="{{ url_for('register') }}">Register Account</a></span></p>
+            </div>
+        </form>
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro registerForm() -%}
+<div class="w3-animate-zoom w3-round-xlarge w3-card w3-mobile w3-container w3-margin-top w3-white" style="width: 50%;margin:auto;padding:0;position:relative;bottom:5em">
+    <div class="w3-round-xlarge w3-center w3-bar w3-2021-french-blue">
+        <h1>PSITS Register</h1>
+    </div>
+    <div style="height: 45vh;">
+        <form class="w3-center w3-row-padding" action="/registeradmin" method="POST">
+            <div class="w3-margin" style="margin:auto">
+                <div class="w3-padding">
+                    <input type="text" style="width: 100%;padding:0.3em" class="w3-xlarge" name="username" id="username" placeholder="Username" required>
+                </div>
+                <div class="w3-padding">
+                    <input type="password" style="width:100%;padding:0.3em" class="w3-xlarge" name="password" id="password" placeholder="Password" required>
+                </div>
+            </div>
+            <div class="w3-padding-xlarge w3-margin-top">
+                <button type="submit" class="w3-round-large w3-xlarge w3-button" style="width: 70%; background-color: green; color: white;">
+                    REGISTER
+                </button>
+            </div>
+            <div class="w3-padding-large">
+                <p>Already have an account? <span style="color:rgb(6, 154, 223);cursor:pointer"><a href="{{ url_for('login') }}">Login here!</a></span></p>
+            </div>
+        </form>
+    </div>
+  
+</div>
+{%- endmacro %}

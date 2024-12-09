@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+{% import 'forms.html' as form %}
+{{ form.flash_messages() }}
+<div class="w3-content w3-container w3-margin-top w3-mobile" style="height: 100%;">
+    <table class="w3-table w3-display-bottom w3-mobile">
+        <tr class="w3-mobile">
+            <th class="w3-center" style="background-color:deepskyblue; color:white;">ID Number</th>
+            <th class="w3-center" style="background-color:deepskyblue; color:white;">Last Name</th>
+            <th class="w3-center" style="background-color:deepskyblue; color:white;">First Name</th>
+            <th class="w3-center" style="background-color:deepskyblue; color:white;">Course</th> 
+            <th class="w3-center" style="background-color:deepskyblue; color:white;">Level</th>
+            <th class="w3-center" style="background-color:deepskyblue; color:white;">View Image/QR</th>
+            <th class="w3-center" style="background-color:deepskyblue; color:white;">Delete/Edit</th>  
+        </tr>
+        {% for student in slist %}
+            <tr class="w3-hover-gray w3-mobile">
+                <td class="w3-center">{{ student['idno']}}</td>
+                <td class="w3-center">{{ student['lastname'].title()}}</td>
+                <td class="w3-center">{{ student['firstname'].title()}}</td>
+                <td class="w3-center">{{ student['course'].upper()}}</td>
+                <td class="w3-center">{{ student['level']}}</td>
+                <td>
+                    <div class="button-container">
+                        <img style="width:100px; height:100px"src="{{ url_for('static', filename='images/studentimage/'+ student['image']) }}" alt="Student Image" title="Picture of {{ student['lastname'].title() + ', ' + student['firstname'].title() }}" >
+                        <img style="width:100px; height:100px"src="{{ url_for('static', filename='images/studentimage/'+ student['idno'] + '.png') }}" alt="Student QR Code" title="QR Code for {{ student['lastname'].title() + ', ' + student['firstname'].title() }}" >
+                    </div>
+                </td>      
+                <td>
+                    <div class="button-container">
+                        <span class="w3-round-large w3-button w3-red" onclick="showStudentModal('{{ student.idno }}', 'delete')"><i class="glyphicon glyphicon-remove"></i></span>
+                        <span class="w3-round-large w3-button w3-green" onclick="showStudentModal('{{ student.idno }}', 'update')"><i class="glyphicon glyphicon-edit"></i></span>
+                    </div>
+                </td>                      
+            </tr>
+            {{ form.showimagemodal('Student Image', 'showimage-'+ student.idno, student)}}
+            {{ form.showimagemodal('Student QR', 'showqr-'+ student.idno, student)}}
+            {{ form.showdeletemodal('Delete Student', 'delete-'+ student.idno, student.idno) }}
+            {{ form.showModal('Update Student', 'update-'+ student.idno, student, columns) }}
+            {{ form.updateimage('Change Student Image', 'imageupdate-' + student.idno, student.idno) }}
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}

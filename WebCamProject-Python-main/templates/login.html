@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/w3.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon/psitslogo.ico')}}">
+    <title>PSITS Login</title>
+    <style>
+    </style>
+    
+</head>
+<body>
+    {% import 'forms.html' as form %}
+    <div class="w3-bar">
+        <p style="height: 100px;"></p>
+    </div>
+    {{  form.loginForm() }}
+</body>
+</html>
