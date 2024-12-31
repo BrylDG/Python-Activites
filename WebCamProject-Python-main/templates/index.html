@@ -1,29 +1,94 @@
 {% extends 'base.html' %}
 {% block content %}
 {% import 'forms.html' as form %}
-<script src="{{ url_for('static',filename='js/webcam.min.js')}}"></script>
-<div class="left-right-div" style="width: 100%; height:70vh; display:flex">
-    <div class="w3-card w3-container"style="width:50%;margin:0;">
-        <div class="w3-card w3-padding" style="margin:0;padding:0;">
-            <div class="w3-border w3-border-blue" style="height: 35vh;margin:0;">
+<script src="{{ url_for('static', filename='js/webcam.min.js') }}"></script>
+<script>
+    let cameraActive = true;
+
+    function stopCamera() {
+        cameraActive = false;
+    }
+
+    function take_snapshot() {
+        // Transfer input data to the display section
+        const inputs = document.querySelectorAll('#userForm input');
+        inputs.forEach(input => {
+            const displayField = document.getElementById(`my_${input.id}`);
+            if (displayField) {
+                displayField.value = input.value;
+            }
+        });
+        
+        // Simulate snapshot result (replace with actual camera capture logic if needed)
+        const resultDiv = document.getElementById('my_result');
+        resultDiv.innerHTML = '<p>Snapshot taken successfully!</p>';
+    }
+
+    window.addEventListener("DOMContentLoaded", (event) => {
+        console.log("DOM fully loaded and parsed");
+        const message = document.querySelector("#message");
+        var socket = io.connect();
+        const modal = document.getElementById("granted-modal");
+
+        // Receive details from server
+        socket.on("scan_result", function (msg) {
+            if (msg.status === "denied") {
+                console.log("Access Denied");
+                message.innerHTML = msg.message;
+                message.classList.remove("message-allowed");
+                message.classList.remove("message-info");
+                message.classList.add("message-denied");
+            } else if (msg.status === "granted") {
+                console.log("Access Granted");
+                message.innerHTML = msg.message;
+                message.classList.remove("message-denied");
+                message.classList.remove("message-info");
+                message.classList.add("message-allowed");
+                modal.style.display = "block";
+
+                // Stop the camera or scanner
+                stopCamera();
+
+                document.getElementById("studentidp").innerHTML = msg.studentid;
+                document.getElementById("studentlastname").innerHTML = msg.studentlastname;
+                document.getElementById("studentfirstname").innerHTML = msg.studentfirstname;
+                document.getElementById("studentcourse").innerHTML = msg.studentcourse;
+                document.getElementById("studentlevel").innerHTML = msg.studentlevel;
+                document.getElementById("studentImage").src = `/static/images/studentimage/${msg.image_filename}`;
+
+            } else {
+                message.innerHTML = msg.message;
+                message.classList.remove("message-denied");
+                message.classList.remove("message-allowed");
+                message.classList.add("message-info");
+            }
+        });
+    });
+</script>
+
+<div class="left-right-div" style="width: 100%; height: 70vh; display: flex; flex-wrap: wrap;">
+    <!-- Left Section: Camera and Input Form -->
+    <div class="w3-card w3-container" style="flex: 1; min-width: 300px; margin: 0;">
+        <div class="w3-card w3-padding" style="margin: 0; padding: 0;">
+            <div class="w3-border w3-border-blue" style="height: 35vh; margin: 0;">
                 {{ form.flash_messages() }}
-                <div id="my_camera" style="margin:auto"></div>
+                <div id="my_camera" style="margin: auto;"></div>
             </div>
             <div class="w3-center">
-                {{ form.showform('take_snap',columns) }}
+                {{ form.showform('take_snap', columns) }}
             </div>
         </div>
     </div>
-    <div class="w3-card w3-container"style="width:50%;margin:0;padding:0;">
-        <div class="w3-card w3-padding" style="margin: auto;" >
-                <div class="w3-border w3-border-blue" style="height: 35vh;margin:auto; display:flex; ">
-                    <div id="my_result"></div>
-                    <div id="my_qr" class="qr-side">
-                    </div>
-                </div>
-               
+
+    <!-- Right Section: Display and Save Form -->
+    <div class="w3-card w3-container" style="flex: 1; min-width: 300px; margin: 0; padding: 0;">
+        <div class="w3-card w3-padding" style="margin: auto;">
+            <div class="w3-border w3-border-blue" style="height: 35vh; margin: auto; display: flex; justify-content: center; align-items: center;">
+                <div id="my_result"></div>
+                <div id="my_qr" class="qr-side"></div>
+            </div>
             <div class="w3-center">
-                {{ form.showform('save_info',columns) }}
+                {{ form.showform('save_info', columns) }}
             </div>
         </div>
     </div>

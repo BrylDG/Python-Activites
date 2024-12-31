@@ -264,7 +264,7 @@ def logs():
 
 @app.route('/')
 def attendance():
-      return render_template('attendance.html') if not session.get('name') == None else render_template('login.html')
+      return render_template('attendance.html') if not session.get('name') == None else render_template('attendance.html')
 
 @app.route('/index')
 def index():

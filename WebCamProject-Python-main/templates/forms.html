@@ -12,10 +12,9 @@
                         <button 
                             type="button"
                             onclick="take_snapshot()" 
-                            class="w3-button w3-2021-french-blue w3-round w3-xlarge w3-margin-xlarge w3-bar-item" 
+                            class="w3-button w3-2021-french-blue w3-round w3-small w3-margin-xlarge w3-bar-item" 
                             style="color:white; border:none;">
                             SNAP
-                            <i class="glyphicon glyphicon-camera"></i>
                         </button>
                     </div>
             </form>
@@ -26,8 +25,8 @@
                 {% for column in columns %}
                     <div class="w3-half w3-row-padding">
                         <p>
-                            <label style="color:white">{{ column.upper() }}</label>
-                            <input type="text" id="my_{{ column }}" name="my_{{ column }}" class="w3-input w3-border w3-round-large" style=" background: transparent;border: none; color:aliceblue" readonly>
+                            <label style="color:black">{{ column.upper() }}</label>
+                            <input type="text" id="my_{{ column }}" name="my_{{ column }}" class="w3-input w3-border w3-round-large" style=" background: transparent;border: none; color:black" readonly>
                         </p>
                     </div>
                 {% endfor %}
@@ -35,18 +34,18 @@
                 <!-- Hidden input for the snapshot image data -->
                 <input type="hidden" id="image_data" name="image_data">
                 <div style="">
-                    <div class="w3-container">
+                    <div class="w3-container" style="margin-top: 10px;">
                         <button
                             type="submit"
-                            class="w3-button w3-2021-french-blue w3-round-large w3-xlarge w3-margin-xlarge" 
-                            style="color:white; border:none;">
+                            class="w3-button w3-2021-french-blue w3-round-large w3-small w3-margin-xlarge" 
+                            style="color:white; border:none; margin-top: 10px;">
                             SAVE
-                            <i class="glyphicon glyphicon-saved"></i>
                         </button>
                         <button
                             type="button"
                             onclick="deleteQR()"
-                            class="w3-button w3-2021-french-blue w3-round-large w3-xlarge w3-margin-xlarge">
+                            class="w3-button w3-2021-french-blue w3-round-large w3-small w3-margin-xlarge"
+							style="margin-top: 10px;";>
                                 CANCEL</a>             
                         </button>
                     </div>
@@ -124,7 +123,7 @@
 
 {% macro showModal(modal_name, id, student, columns) -%}
 <div id="{{ id }}" class="w3-modal w3-mobile">
-    <div class="w3-modal-content w3-animate-zoom w3-mobile">
+    <div class="w3-modal-content w3-mobile">
         <header class="w3-container w3-2021-french-blue">
             <span onclick="document.getElementById('{{ id }}').style.display='none'"
             class="w3-button w3-display-topright w3-large">&times;</span>
@@ -154,7 +153,7 @@
 
 {% macro showdeletemodal(modal_name, id, student_idno) -%}
 <div id="{{ id }}" class="w3-modal w3-mobile">
-    <div class="w3-modal-content w3-animate-zoom w3-round" style="width: 45%;">
+    <div class="w3-modal-content w3-round" style="width: 45%;">
         <header class="w3-container w3-2021-french-blue">
             <span onclick="document.getElementById('{{ id }}').style.display='none'"
             class="w3-button w3-display-topright w3-large">&times;</span>
@@ -200,9 +199,9 @@
 {%- endmacro %}
 
 {% macro registerForm() -%}
-<div class="w3-animate-zoom w3-round-xlarge w3-card w3-mobile w3-container w3-margin-top w3-white" style="width: 50%;margin:auto;padding:0;position:relative;bottom:5em">
+<div class="w3-round-xlarge w3-card w3-mobile w3-container w3-margin-top w3-white" style="width: 50%;margin:auto;padding:0;position:relative;bottom:5em">
     <div class="w3-round-xlarge w3-center w3-bar w3-2021-french-blue">
-        <h1>PSITS Register</h1>
+        <h1>Register</h1>
     </div>
     <div style="height: 45vh;">
         <form class="w3-center w3-row-padding" action="/registeradmin" method="POST">

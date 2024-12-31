@@ -2,20 +2,19 @@
 {% block content %}
 <main class="center">
     <div style="margin-top: 200px;">
-    <img src="{{url_for('video')}}" width="640" height="480"/>
+        <img id="video-feed" src="{{url_for('video')}}" width="640" height="480"/>
     </div>
     <div class="status" style="display:flex; justify-content:center;">
-    <h1 id="message" class="message message-info" style="background-color: green; width:34%;">SCAN YOUR QR CODE</h1>
+        <h1 id="message" class="message message-info" style="background-color: green; width:34%;">SCAN YOUR QR CODE</h1>
     </div>
     <!-- Modal -->
     <div id="granted-modal" class="w3-modal" style="height: 100%;">
         <div class="w3-modal-content">
             <header class="w3-container w3-green">
-                <span onclick="document.getElementById('granted-modal').style.display='none'"
-                class="w3-button w3-display-topright w3-large">&times;</span>
+                <span onclick="closeModal()" class="w3-button w3-display-topright w3-large">&times;</span>
                 <h2>Access Granted</h2>
             </header>
-            <div class="w3-container" id="modal-content"  style="padding-bottom: 100px;">
+            <div class="w3-container" id="modal-content" style="padding-bottom: 100px;">
                 <h3>Student ID</h3>
                 <p id="studentidp"><b></b></p>
                 <h3>Student Lastname</h3>
@@ -33,42 +32,60 @@
     </div>
 </main>
 <script>
+    let scanning = true;
+
+    function stopScanning() {
+        scanning = false;
+        const videoFeed = document.getElementById("video-feed");
+        videoFeed.src = ""; // Stop video feed
+    }
+
+    function closeModal() {
+        const modal = document.getElementById("granted-modal");
+        modal.style.display = "none";
+        scanning = true; // Restart scanning when modal is closed
+        const videoFeed = document.getElementById("video-feed");
+        videoFeed.src = "{{url_for('video')}}"; // Resume video feed
+    }
+
     window.addEventListener("DOMContentLoaded", (event) => {
-    console.log("DOM fully loaded and parsed");
-    const message = document.querySelector("#message");
-    var socket = io.connect();
-    const modal = document.getElementById("granted-modal");
+        console.log("DOM fully loaded and parsed");
+        const message = document.querySelector("#message");
+        var socket = io.connect();
+        const modal = document.getElementById("granted-modal");
 
-    //receive details from server
-    socket.on("scan_result", function (msg) {
-        if (msg.status === "denied") {
-        console.log("Access Denied");
-        message.innerHTML = msg.message;
-        message.classList.remove("message-allowed");
-        message.classList.remove("message-info");
-        message.classList.add("message-denied");
-        } else if (msg.status === "granted") {
-        console.log("Access Granted");
-        message.innerHTML = msg.message;
-        message.classList.remove("message-denied");
-        message.classList.remove("message-info");
-        message.classList.add("message-allowed");
-        modal.style.display = "block";
-        studentidp.innerHTML = msg.studentid;
-        studentlastname.innerHTML = msg.studentlastname;
-        studentfirstname.innerHTML = msg.studentfirstname;
-        studentcourse.innerHTML = msg.studentcourse;
-        studentlevel.innerHTML = msg.studentlevel;
+        // Receive details from server
+        socket.on("scan_result", function (msg) {
+            if (msg.status === "denied") {
+                console.log("Access Denied");
+                message.innerHTML = msg.message;
+                message.classList.remove("message-allowed");
+                message.classList.remove("message-info");
+                message.classList.add("message-denied");
+            } else if (msg.status === "granted") {
+                console.log("Access Granted");
+                message.innerHTML = msg.message;
+                message.classList.remove("message-denied");
+                message.classList.remove("message-info");
+                message.classList.add("message-allowed");
+                modal.style.display = "block";
 
-        studentImage.src = `/static/images/studentimage/${msg.image_filename}`;
+                // Stop the camera or scanner
+                stopScanning();
 
-        } else {
-        message.innerHTML = msg.message;
-        message.classList.remove("message-denied");
-        message.classList.remove("message-allowed");
-        message.classList.add("message-info");
-        }
-    });
+                document.getElementById("studentidp").innerHTML = msg.studentid;
+                document.getElementById("studentlastname").innerHTML = msg.studentlastname;
+                document.getElementById("studentfirstname").innerHTML = msg.studentfirstname;
+                document.getElementById("studentcourse").innerHTML = msg.studentcourse;
+                document.getElementById("studentlevel").innerHTML = msg.studentlevel;
+                document.getElementById("studentImage").src = `/static/images/studentimage/${msg.image_filename}`;
+            } else {
+                message.innerHTML = msg.message;
+                message.classList.remove("message-denied");
+                message.classList.remove("message-allowed");
+                message.classList.add("message-info");
+            }
+        });
     });
 </script>
 {% endblock %}
