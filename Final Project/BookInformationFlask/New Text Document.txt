@@ -1,0 +1,76 @@
+from flask import Flask, render_template, request, redirect, url_for
+from flask_mysqldb import MySQL
+import MySQLdb.cursors
+
+app = Flask(__name__)
+
+# MySQL Configuration
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'        # Adjust according to your MySQL username
+app.config['MYSQL_PASSWORD'] = ''         # Adjust according to your MySQL password
+app.config['MYSQL_DB'] = 'book_inventory'
+
+mysql = MySQL(app)
+
+@app.route('/')
+def index():
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM books")
+    books = cursor.fetchall()
+    return render_template('index.html', books=books)
+
+@app.route('/add', methods=['POST'])
+def add_book():
+    if request.method == 'POST':
+        isbn = request.form['isbn']
+        title = request.form['title']
+        author = request.form['author']
+        copyright_year = request.form['copyright']
+        edition = request.form['edition']
+        price = float(request.form['price'])
+        qty = int(request.form['qty'])
+        total = price * qty
+        
+        cursor = mysql.connection.cursor()
+        cursor.execute("INSERT INTO books (isbn, title, author, copyright_year, edition, price, qty, total) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", 
+                       (isbn, title, author, copyright_year, edition, price, qty, total))
+        mysql.connection.commit()
+        return redirect(url_for('index'))
+
+@app.route('/edit/<int:id>', methods=['GET', 'POST'])
+def edit_book(id):
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    
+    if request.method == 'POST':
+        isbn = request.form['isbn']
+        title = request.form['title']
+        author = request.form['author']
+        copyright_year = request.form['copyright']
+        edition = request.form['edition']
+        price = float(request.form['price'])
+        qty = int(request.form['qty'])
+        total = price * qty
+
+        cursor.execute("""
+            UPDATE books
+            SET isbn = %s, title = %s, author = %s, copyright_year = %s, 
+                edition = %s, price = %s, qty = %s, total = %s
+            WHERE id = %s
+        """, (isbn, title, author, copyright_year, edition, price, qty, total, id))
+        
+        mysql.connection.commit()
+        return redirect(url_for('index'))
+    else:
+        cursor.execute("SELECT * FROM books WHERE id = %s", (id,))
+        book = cursor.fetchone()
+        return render_template('edit.html', book=book)
+
+@app.route('/delete/<int:id>', methods=['POST'])
+def delete_book(id):
+    cursor = mysql.connection.cursor()
+    cursor.execute("DELETE FROM books WHERE id = %s", (id,))
+    mysql.connection.commit()
+    return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    app.run(debug=True)

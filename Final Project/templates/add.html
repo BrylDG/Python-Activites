@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+    
+    <!-- Bootstrap and Font Awesome CDN -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding-top: 20px;
+        }
+
+        /* Header Styling */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 15px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        #logo img {
+            height: 80px;
+						padding-left: 50%;	
+        }
+
+        #nav a {
+            margin-right: 25px;
+            color: #007bff;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        #nav a:hover {
+            text-decoration: underline;
+        }
+
+        /* Form and Layout Styling */
+        .form-wrapper {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .form-container, .snapshot-container {
+            border-radius: 10px;
+            padding: 20px;
+            width: 30%; /* Reduced width */
+			height: 700px;
+            background-color: #ffffff;
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container h2, .snapshot-container h2 {
+            text-align: center;
+            font-size: 16px; /* Smaller font size */
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #444;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+        }
+
+        /* Center camera and snapshot elements */
+        #camera {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+            max-width: 240px; /* Reduced camera width */
+            max-height: 180px; /* Reduced camera height */
+        }
+
+        .form-group, .snapshot-group {
+            margin-bottom: 10px; /* Reduced margin */
+        }
+
+        /* Styling for labels and input boxes */
+        .form-group label, .snapshot-group label {
+            display: block;
+            font-weight: bold;
+            font-size: 12px; /* Reduced font size */
+            margin: 4px 0; /* Reduced margin */
+            color: #555;
+        }
+
+        /* Styling for input fields and text boxes */
+        .form-group input, .snapshot-group .text-box {
+            width: 100%;
+            padding: 6px; /* Reduced padding */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 12px; /* Reduced font size */
+            color: #333;
+            background-color: #f9f9f9;
+        }
+
+        .snapshot-container .text-box {
+            min-height: 30px; /* Reduced height */
+        }
+
+        .btn-primary, .btn-save {
+            width: 100%; /* Full width for consistency */
+            font-size: 14px; /* Reduced font size */
+            padding: 8px; /* Reduced padding */
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+        }
+
+        .btn-save {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            margin-top: 15px; /* Reduced margin */
+        }
+
+        .snapshot-container img {
+            width: 100%;
+            max-width: 240px; /* Reduced width */
+            height: auto;
+            max-height: 180px; /* Reduced height */
+            margin: 10px auto;
+            display: block;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 20px; /* Reduced margin */
+        }
+		
+		.camera-container {
+			display:flex;
+			justify-content: center;	
+		}
+		
+		        .container-fluid {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+			padding:0px;
+			padding-top:20px;
+            padding-bottom: 30px;
+			overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="header">
+            <div id="logo">
+                <img src="static/images/logo.png" alt="logo">
+            </div>
+            <div id="nav">
+                <a href="{{ url_for('index') }}">HOME</a>
+                <a href="{{ url_for('userlist') }}">LIST</a>
+            </div>
+        </div>
+
+        <!-- Form Wrapper -->
+        <form id="userForm" method="POST" action="/adduser" class="form-wrapper" onsubmit="return validateForm()">
+            <!-- Snapshot Display Section -->
+            <div class="snapshot-container">
+				<h2>Snapshot</h2>
+				<div id="snapshot"></div>
+
+				<div class="snapshot-group">
+					<label>IDNO</label>
+					<div class="text-box" id="display_idno"></div>
+				</div>
+
+				<div class="snapshot-group">
+					<label>LASTNAME</label>
+					<div class="text-box" id="display_lastname"></div>
+				</div>
+
+				<div class="snapshot-group">
+					<label>FIRSTNAME</label>
+					<div class="text-box" id="display_firstname"></div>
+				</div>
+
+				<div class="snapshot-group">
+					<label>COURSE</label>
+					<div class="text-box" id="display_course"></div>
+				</div>
+
+				<div class="snapshot-group">
+					<label>LEVEL</label>
+					<div class="text-box" id="display_level"></div>
+				</div>
+
+				{% if qr_image %}
+				<div class="text-center">
+					<h3>Generated QR Code</h3>
+					<img src="{{ qr_image }}" alt="QR Code" class="img-fluid">
+				</div>
+				{% endif %}
+
+				<div class="text-center">
+					<button type="button" class="btn btn-save" onclick="save_snapshot()">SAVE</button>
+				</div>
+			</div>
+
+            
+            <!-- Camera and Input Section -->
+            <div class="form-container">
+                <h2>Camera Viewer</h2>
+				<div class="camera-container">
+					<div id="camera"></div>
+					<input type="hidden" id="image" name="image">
+				</div>
+                
+				<div class="form-group">
+					<label for="idno">IDNO</label>
+					<input type="text" id="idno" name="idno" required onblur="checkIDNO()">
+					<div id="idno-feedback" class="invalid-feedback">ID Number already exists!</div>
+				</div>
+
+                <div class="form-group">
+                    <label for="lastname">LASTNAME</label>
+                    <input type="text" id="lastname" name="lastname" required>
+                </div>
+                <div class="form-group">
+                    <label for="firstname">FIRSTNAME</label>
+                    <input type="text" id="firstname" name="firstname" required>
+                </div>
+                <div class="form-group">
+                    <label for="course">COURSE</label>
+                    <input type="text" id="course" name="course" required>
+                </div>
+                <div class="form-group">
+                    <label for="level">LEVEL</label>
+                    <input type="text" id="level" name="level" required>
+                </div>
+                <div class="text-center">
+                    <button type="button" class="btn btn-primary" onclick="take_snapshot()">SNAP</button>
+                </div>
+            </div>
+        </form>
+		<!-- Add a hidden field to store QR code data -->
+<input type="hidden" id="qr_code" name="qr_code">
+<div id="qr_display" class="text-center">
+    <h3>Generated QR Code</h3>
+    <img id="qr_image" src="" alt="QR Code" class="img-fluid" style="display:none;">
+</div>
+
+        <div class="footer">
+            &copy; 2024 Bryl Darel Gorgonio
+        </div>
+    </div>
+
+    <!-- Webcam.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script> <!-- Add QR Code Library -->
+
+<script>
+    Webcam.set({
+        width: 240,
+        height: 180,
+        image_format: 'jpeg',
+        jpeg_quality: 90
+    });
+    Webcam.attach('#camera');
+
+    function take_snapshot() {
+        const idno = document.getElementById('idno').value.trim();
+        const lastname = document.getElementById('lastname').value.trim();
+        const firstname = document.getElementById('firstname').value.trim();
+        const course = document.getElementById('course').value.trim();
+        const level = document.getElementById('level').value.trim();
+
+        if (!idno || !lastname || !firstname || !course || !level) {
+            alert('Please fill out all fields before taking a snapshot.');
+            return;
+        }
+
+        // Generate QR code data
+        const qrData = `IDNO: ${idno}, Lastname: ${lastname}, Firstname: ${firstname}, Course: ${course}, Level: ${level}`;
+        document.getElementById('qr_code').value = qrData; // Save data in the hidden field
+
+        // Render the QR code
+        QRCode.toDataURL(qrData, { width: 240, margin: 1 }, function (err, url) {
+            if (err) {
+                console.error('Error generating QR Code:', err);
+                return;
+            }
+            document.getElementById('qr_image').src = url;
+            document.getElementById('qr_image').style.display = 'block';
+        });
+
+        // Capture snapshot and display it
+        Webcam.snap(function (data_uri) {
+            document.getElementById('snapshot').innerHTML = `<img src='${data_uri}' class='img-fluid'>`;
+            document.getElementById('display_idno').innerText = idno;
+            document.getElementById('display_lastname').innerText = lastname;
+            document.getElementById('display_firstname').innerText = firstname;
+            document.getElementById('display_course').innerText = course;
+            document.getElementById('display_level').innerText = level;
+            document.getElementById('image').value = data_uri;
+        });
+    }
+
+    function save_snapshot() {
+    const form = document.getElementById('userForm');
+
+    // Check if form is valid
+    if (!form.checkValidity()) {
+        alert("Please fill out all required fields correctly.");
+        form.reportValidity(); // Highlight invalid fields
+        return;
+    }
+
+    // Ensure image and QR code values are populated
+    const imageValue = document.getElementById('image').value;
+    const qrValue = document.getElementById('qr_code').value;
+
+    if (!imageValue) {
+        alert("Please capture an image before saving.");
+        return;
+    }
+
+    if (!qrValue) {
+        alert("Please generate a QR Code before saving.");
+        return;
+    }
+
+    // Submit the form if all validations pass
+    form.submit();
+}
+
+
+    async function checkIDNO() {
+        const idnoInput = document.getElementById('idno');
+        const feedback = document.getElementById('idno-feedback');
+        const idno = idnoInput.value.trim();
+
+        if (idno === '') {
+            idnoInput.classList.remove('is-invalid');
+            feedback.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch('/check_idno', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ 'idno': idno })
+            });
+
+            const data = await response.json();
+
+            if (data.exists) {
+                idnoInput.classList.add('is-invalid');
+                feedback.style.display = 'block';
+                feedback.innerText = 'ID Number already exists!';
+            } else {
+                idnoInput.classList.remove('is-invalid');
+                feedback.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error checking ID number:', error);
+        }
+    }
+
+    function validateForm() {
+        const idnoInput = document.getElementById('idno');
+
+        if (idnoInput.classList.contains('is-invalid')) {
+            alert('Please enter a unique ID number.');
+            return false;
+        }
+
+        const inputs = document.querySelectorAll('input[required]');
+        for (let input of inputs) {
+            if (!input.value.trim()) {
+                alert("Please fill out all required fields.");
+                return false;
+            }
+        }
+        return true;
+    }
+</script>
+
+
+</body>
+</html>
